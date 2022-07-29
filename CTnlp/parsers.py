@@ -13,11 +13,7 @@ from CTnlp.utils import Gender
 
 
 def safe_get_item(item_name: str, root: ET) -> str:
-    item = root.find(item_name)
-    if item:
-        return item.text
-    else:
-        return ""
+    return item.text if (item := root.find(item_name)) else ""
 
 
 def get_criteria(criteria_string: str) -> List[str]:
@@ -49,7 +45,7 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
         "INCLUSION CRITERIA",
     ]
     for inclusion_criteria_string in inclusion_criteria_strings:
-        if criteria.find(inclusion_criteria_string) != -1:
+        if inclusion_criteria_string in criteria:
             criteria_after_split = criteria.split(inclusion_criteria_string)
             break
         else:
@@ -57,11 +53,8 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
 
     if len(criteria_after_split) == 2:
         empty, tmp_inclusion = criteria_after_split
-    elif len(criteria_after_split) == 1:
-        return None
     else:
         return None
-
     if empty.strip().lower() not in ["", "key", "-", "main"]:
         logging.debug(
             "parse_criteria: skipping not parsed text after split: %s", empty.strip()
@@ -99,37 +92,36 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
 
 
 def parse_age(age_string: str) -> Union[int, float, None]:
-    if age_string:
-        if age_string in ["N/A", "None"]:
-            return None
-
-        match = re.search(r"(\d{1,2}) Year[s]?", age_string)
-        if match is not None:
-            return int(match.group(1))
-
-        match = re.search(r"(\d{1,2}) Month[s]?", age_string)
-        if match is not None:
-            return int(match.group(1)) / 12
-
-        match = re.search(r"(\d{1,2}) Week[s]?", age_string)
-        if match is not None:
-            return int(match.group(1)) / 52
-
-        match = re.search(r"(\d{1,2}) Day[s]?", age_string)
-        if match is not None:
-            return int(match.group(1)) / 365
-
-        match = re.search(r"(\d{1,2}) Hour[s]?", age_string)
-        if match is not None:
-            return int(match.group(1)) / 8766
-
-        match = re.search(r"(\d{1,2}) Minute[s]?", age_string)
-        if match is not None:
-            return int(match.group(1)) / 525960
-
-        logging.warning("couldn't parse age from %s", age_string)
+    if not age_string:
+        return None
+    if age_string in {"N/A", "None"}:
         return None
 
+    match = re.search(r"(\d{1,2}) Year[s]?", age_string)
+    if match is not None:
+        return int(match[1])
+
+    match = re.search(r"(\d{1,2}) Month[s]?", age_string)
+    if match is not None:
+        return int(match[1]) / 12
+
+    match = re.search(r"(\d{1,2}) Week[s]?", age_string)
+    if match is not None:
+        return int(match[1]) / 52
+
+    match = re.search(r"(\d{1,2}) Day[s]?", age_string)
+    if match is not None:
+        return int(match[1]) / 365
+
+    match = re.search(r"(\d{1,2}) Hour[s]?", age_string)
+    if match is not None:
+        return int(match[1]) / 8766
+
+    match = re.search(r"(\d{1,2}) Minute[s]?", age_string)
+    if match is not None:
+        return int(match[1]) / 525960
+
+    logging.warning("couldn't parse age from %s", age_string)
     return None
 
 
@@ -160,19 +152,11 @@ def parse_eligibility(
 ) -> Tuple[Gender, int, int, bool, str, List[str], List[str]]:
     inclusion: List[str] = []
     exclusion: List[str] = []
-    eligibility = root.find("eligibility")
-    if not eligibility:
-        criteria = ""
-        gender = ""
-        minimum_age = ""
-        maximum_age = ""
-        healthy_volunteers = ""
-    else:
+    if eligibility := root.find("eligibility"):
         criteria = eligibility.find("criteria")
         if criteria:
             criteria = criteria[0].text
-            result = parse_criteria(criteria=criteria)
-            if result:
+            if result := parse_criteria(criteria=criteria):
                 inclusion = result[0]
                 exclusion = result[1]
         else:
@@ -185,6 +169,12 @@ def parse_eligibility(
             eligibility.find("healthy_volunteers"), "text", None
         )
 
+    else:
+        criteria = ""
+        gender = ""
+        minimum_age = ""
+        maximum_age = ""
+        healthy_volunteers = ""
     gender = parse_gender(gender)
     minimum_age = parse_age(minimum_age)
     maximum_age = parse_age(maximum_age)
@@ -205,11 +195,17 @@ def get_outcomes(root: ET) -> str:
     primary_outcomes = []
     secondary_outcomes = []
     if primarys := root.findall("primary_outcome"):
-        for primary in primarys:
-            primary_outcomes.append(getattr(primary.find("measure"), "text", None))
+        primary_outcomes.extend(
+            getattr(primary.find("measure"), "text", None)
+            for primary in primarys
+        )
+
     if secondarys := root.findall("secondary_outcome"):
-        for secondary in secondarys:
-            primary_outcomes.append(getattr(secondary.find("measure"), "text", None))
+        primary_outcomes.extend(
+            getattr(secondary.find("measure"), "text", None)
+            for secondary in secondarys
+        )
+
     return primary_outcomes, secondary_outcomes
 
 
@@ -218,7 +214,7 @@ def parse_clinical_trials_from_folder(
 ) -> Optional[List[ClinicalTrial]]:
     files = [y for x in os.walk(folder_name) for y in glob(os.path.join(x[0], "*.xml"))]
 
-    if len(files) == 0:
+    if not files:
         logging.error(
             "No files in a folder %s. Stopping parse_clinical_trials_from_folder",
             folder_name,
@@ -227,8 +223,6 @@ def parse_clinical_trials_from_folder(
 
     if first_n:
         files = files[:first_n]
-
-    total_parsed = 0
 
     clinical_trials = []
     for file in tqdm.tqdm(files):
@@ -268,7 +262,7 @@ def parse_clinical_trials_from_folder(
         ) = parse_eligibility(root=root)
 
         text: str = brief_title + official_title + brief_summary + criteria
-        if text.strip() == "":
+        if not text.strip():
             text = "empty"
 
         clinical_trials.append(
@@ -293,6 +287,8 @@ def parse_clinical_trials_from_folder(
         )
 
     if len(files) > 0:
+        total_parsed = 0
+
         logging.info(
             "percentage of successfully parsed criteria: %f", total_parsed / len(files)
         )
