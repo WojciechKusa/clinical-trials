@@ -1,9 +1,10 @@
+"""Module containing parsers for clinical trials file"""
 import logging
 import os
 import re
 import xml.etree.ElementTree as ET
 from glob import glob
-from typing import List, Union, Tuple
+from typing import List, Optional, Tuple
 
 import tqdm
 
@@ -31,7 +32,7 @@ def get_criteria(criteria_string: str) -> List[str]:
     return criteria_list
 
 
-def parse_criteria(criteria: str) -> Union[None, Tuple[List[str], List[str]]]:
+def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
     """Tries to parse the criteria xml element to find and extract inclusion and
     exclusion criteria for a study.
     It uses heuristics defined based on the dataset:
@@ -97,7 +98,7 @@ def parse_criteria(criteria: str) -> Union[None, Tuple[List[str], List[str]]]:
     return inclusions, exclusions
 
 
-def parse_age(age_string: str) -> Union[int, float, None]:
+def parse_age(age_string: str) -> Optional[int, float]:
     if age_string:
         if age_string in ["N/A", "None"]:
             return None
@@ -132,7 +133,7 @@ def parse_age(age_string: str) -> Union[int, float, None]:
     return None
 
 
-def parse_gender(gender_string: Union[str, None]) -> Gender:
+def parse_gender(gender_string: Optional[str]) -> Gender:
     if gender_string == "All":
         return Gender.all
     elif gender_string == "Male":
@@ -143,7 +144,7 @@ def parse_gender(gender_string: Union[str, None]) -> Gender:
         return Gender.unknown  # most probably gender criteria were empty
 
 
-def parse_health_status(healthy_volunteers: Union[str, None]) -> bool:
+def parse_health_status(healthy_volunteers: Optional[str]) -> bool:
     if healthy_volunteers == "Accepts Healthy Volunteers":
         return True
     elif healthy_volunteers == "No":
@@ -213,8 +214,8 @@ def get_outcomes(root: ET) -> str:
 
 
 def parse_clinical_trials_from_folder(
-    folder_name: str, first_n: Union[None, int] = None
-) -> Union[List[ClinicalTrial], None]:
+    folder_name: str, first_n: Optional[int] = None
+) -> Optional[List[ClinicalTrial]]:
     files = [y for x in os.walk(folder_name) for y in glob(os.path.join(x[0], "*.xml"))]
 
     if len(files) == 0:
