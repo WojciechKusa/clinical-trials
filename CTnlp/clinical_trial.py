@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from CTnlp.utils import Gender
 
@@ -22,8 +22,8 @@ class ClinicalTrial:
     inclusion: List[str]
     exclusion: List[str]
     gender: Gender
-    minimum_age: Optional[int, float]
-    maximum_age: Optional[int, float]
+    minimum_age: Union[int, float, None]
+    maximum_age: Union[int, float, None]
     healthy_volunteers: bool  # True means accept healthy
     text: str
     primary_outcome: str

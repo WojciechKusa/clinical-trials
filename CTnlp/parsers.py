@@ -4,7 +4,7 @@ import os
 import re
 import xml.etree.ElementTree as ET
 from glob import glob
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import tqdm
 
@@ -98,7 +98,7 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
     return inclusions, exclusions
 
 
-def parse_age(age_string: str) -> Optional[int, float]:
+def parse_age(age_string: str) -> Union[int, float, None]:
     if age_string:
         if age_string in ["N/A", "None"]:
             return None
