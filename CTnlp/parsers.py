@@ -144,7 +144,7 @@ def parse_gender(gender_string: Optional[str]) -> Gender:
         return Gender.unknown  # most probably gender criteria were empty
 
 
-def parse_health_status(healthy_volunteers: Optional[str]) -> bool:
+def parse_health_status(healthy_volunteers: Optional[str]) -> bool: # sourcery skip
     if healthy_volunteers == "Accepts Healthy Volunteers":
         return True
     elif healthy_volunteers == "No":
