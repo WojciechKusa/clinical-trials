@@ -27,8 +27,8 @@ class ClinicalTrial:
     inclusion: List[str]
     exclusion: List[str]
     gender: Gender
-    minimum_age: Union[int, float, None]
-    maximum_age: Union[int, float, None]
+    minimum_age: Optional[float]
+    maximum_age: Optional[float]
     accepts_healthy_volunteers: bool  # True means accept healthy
 
     primary_outcomes: Optional[List[str]]

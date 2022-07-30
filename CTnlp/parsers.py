@@ -91,35 +91,24 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
     return inclusions, exclusions
 
 
-def parse_age(age_string: str) -> Union[int, float, None]:
+def parse_age(age_string: str) -> Optional[float]:
     if not age_string:
         return None
     if age_string in {"N/A", "None"}:
         return None
 
-    match = re.search(r"(\d{1,2}) Year[s]?", age_string)
-    if match is not None:
-        return int(match[1])
-
-    match = re.search(r"(\d{1,2}) Month[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 12
-
-    match = re.search(r"(\d{1,2}) Week[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 52
-
-    match = re.search(r"(\d{1,2}) Day[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 365
-
-    match = re.search(r"(\d{1,2}) Hour[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 8766
-
-    match = re.search(r"(\d{1,2}) Minute[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 525960
+    age_patterns: Dict[str, int] = {
+        r"(\d{1,3}) Year[s]?": 1,
+        r"(\d{1,3}) Month[s]?": 12,
+        r"(\d{1,3}) Week[s]?": 52,
+        r"(\d{1,3}) Day[s]?": 365,
+        r"(\d{1,3}) Hour[s]?": 8766,
+        r"(\d{1,3}) Minute[s]?": 525960,
+    }
+    for pattern, denominator in age_patterns.items():
+        match = re.search(re.compile(pattern, flags=re.IGNORECASE), age_string)
+        if match is not None:
+            return int(match[1]) / denominator
 
     logging.warning("couldn't parse age from %s", age_string)
     return None
@@ -136,7 +125,7 @@ def parse_gender(gender_string: Optional[str]) -> Gender:
         return Gender.unknown  # most probably gender criteria were empty
 
 
-def parse_health_status(healthy_volunteers: Optional[str]) -> bool: # sourcery skip
+def parse_health_status(healthy_volunteers: Optional[str]) -> bool:  # sourcery skip
     if healthy_volunteers == "Accepts Healthy Volunteers":
         return True
     elif healthy_volunteers == "No":
@@ -176,6 +165,7 @@ def parse_eligibility(
         maximum_age = ""
         healthy_volunteers = ""
     gender = parse_gender(gender)
+    print(minimum_age)
     minimum_age = parse_age(minimum_age)
     maximum_age = parse_age(maximum_age)
     healthy_volunteers = parse_health_status(healthy_volunteers)
@@ -196,14 +186,12 @@ def get_outcomes(root: ET) -> Tuple[List[str], List[str]]:
     secondary_outcomes = []
     if primarys := root.findall("primary_outcome"):
         primary_outcomes.extend(
-            getattr(primary.find("measure"), "text", None)
-            for primary in primarys
+            getattr(primary.find("measure"), "text", None) for primary in primarys
         )
 
     if secondarys := root.findall("secondary_outcome"):
         secondary_outcomes.extend(
-            getattr(secondary.find("measure"), "text", None)
-            for secondary in secondarys
+            getattr(secondary.find("measure"), "text", None) for secondary in secondarys
         )
 
     return primary_outcomes, secondary_outcomes
