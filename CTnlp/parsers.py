@@ -197,6 +197,63 @@ def get_outcomes(root: ET) -> Tuple[List[str], List[str]]:
     return primary_outcomes, secondary_outcomes
 
 
+def parse_clinical_trial(root: ET) -> ClinicalTrial:
+    org_study_id = getattr(root.find("id_info").find("org_study_id"), "text", None)
+    nct_id = getattr(root.find("id_info").find("nct_id"), "text", None)
+
+    brief_summary = root.find("brief_summary")
+    if brief_summary:
+        brief_summary = brief_summary[0].text
+
+    if not brief_summary:
+        brief_summary = ""
+
+    description = root.find("detailed_description")
+    if description:
+        description = description[0].text
+
+    if not description:
+        description = ""
+
+    brief_title = safe_get_item(item_name="brief_title", root=root)
+    official_title = safe_get_item(item_name="official_title", root=root)
+
+    primary_outcomes, secondary_outcomes = get_outcomes(root=root)
+
+    (
+        gender,
+        minimum_age,
+        maximum_age,
+        healthy_volunteers,
+        criteria,
+        inclusion,
+        exclusion,
+    ) = parse_eligibility(root=root)
+
+    text: str = brief_title + official_title + brief_summary + criteria
+    if not text.strip():
+        text = "empty"
+
+    return ClinicalTrial(
+        org_study_id=org_study_id,
+        nct_id=nct_id,
+        brief_summary=brief_summary,
+        detailed_description=description,
+        criteria=criteria,
+        gender=gender,
+        minimum_age=minimum_age,
+        maximum_age=maximum_age,
+        accepts_healthy_volunteers=healthy_volunteers,
+        inclusion=inclusion,
+        exclusion=exclusion,
+        brief_title=brief_title,
+        official_title=official_title,
+        text=text,
+        primary_outcomes=primary_outcomes,
+        secondary_outcomes=secondary_outcomes,
+    )
+
+
 def parse_clinical_trials_from_folder(
     folder_name: str, first_n: Optional[int] = None
 ) -> Optional[List[ClinicalTrial]]:
@@ -216,63 +273,8 @@ def parse_clinical_trials_from_folder(
     for file in tqdm.tqdm(files):
         tree = ET.parse(file)
         root = tree.getroot()
-
-        org_study_id = getattr(root.find("id_info").find("org_study_id"), "text", None)
-        nct_id = getattr(root.find("id_info").find("nct_id"), "text", None)
-
-        brief_summary = root.find("brief_summary")
-        if brief_summary:
-            brief_summary = brief_summary[0].text
-
-        if not brief_summary:
-            brief_summary = ""
-
-        description = root.find("detailed_description")
-        if description:
-            description = description[0].text
-
-        if not description:
-            description = ""
-
-        brief_title = safe_get_item(item_name="brief_title", root=root)
-        official_title = safe_get_item(item_name="official_title", root=root)
-
-        primary_outcomes, secondary_outcomes = get_outcomes(root=root)
-
-        (
-            gender,
-            minimum_age,
-            maximum_age,
-            healthy_volunteers,
-            criteria,
-            inclusion,
-            exclusion,
-        ) = parse_eligibility(root=root)
-
-        text: str = brief_title + official_title + brief_summary + criteria
-        if not text.strip():
-            text = "empty"
-
-        clinical_trials.append(
-            ClinicalTrial(
-                org_study_id=org_study_id,
-                nct_id=nct_id,
-                brief_summary=brief_summary,
-                detailed_description=description,
-                criteria=criteria,
-                gender=gender,
-                minimum_age=minimum_age,
-                maximum_age=maximum_age,
-                accepts_healthy_volunteers=healthy_volunteers,
-                inclusion=inclusion,
-                exclusion=exclusion,
-                brief_title=brief_title,
-                official_title=official_title,
-                text=text,
-                primary_outcomes=primary_outcomes,
-                secondary_outcomes=secondary_outcomes,
-            )
-        )
+        clinical_trial = parse_clinical_trial(root=root)
+        clinical_trials.append(clinical_trial)
 
     if len(files) > 0:
         total_parsed = 0
