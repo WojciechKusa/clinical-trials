@@ -23,7 +23,7 @@ def get_criteria(criteria_string: str) -> List[str]:
         for criterion in re.split(r" - | \d\. ", criteria_string):
             if criterion.strip() and criterion.strip() != ":":
                 criterion = re.sub(r"[\r\n\t ]+", " ", criterion)
-                criteria_list.append(criterion)
+                criteria_list.append(criterion.strip())
 
     return criteria_list
 

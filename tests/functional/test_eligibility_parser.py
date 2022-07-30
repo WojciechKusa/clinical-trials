@@ -82,8 +82,8 @@ class TestEligibilityCriteriaParser(unittest.TestCase):
     def test_inclusion_first_item(self):
         self.assertEqual(
             (
-                " Patients are required to meet the criteria of the American College "
-                + "of Rheumatology (ACR)for rheumatoid arthritis. "
+                "Patients are required to meet the criteria of the American College "
+                + "of Rheumatology (ACR)for rheumatoid arthritis."
             ),
             self.inclusion[0],
         )
