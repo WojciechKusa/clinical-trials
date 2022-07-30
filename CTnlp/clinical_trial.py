@@ -9,25 +9,34 @@ class ClinicalTrial:
     """ClinicalTrial is a wrapper class that contains most important fields
     from the ClicnialTrials xml dump file.
 
-    text is a variable containing elements from title, description and criteria.
+    text is a variable containing elements from title, detailed_description and criteria.
     text_preprocessed contains tokenized and preprocessed text."""
 
     org_study_id: str
     nct_id: str  # primary id
+
     brief_title: str
     official_title: str
-    summary: str
-    description: str
+
+    brief_summary: str
+    detailed_description: str
+
+    study_type: str
+
     criteria: str
     inclusion: List[str]
     exclusion: List[str]
     gender: Gender
     minimum_age: Union[int, float, None]
     maximum_age: Union[int, float, None]
-    healthy_volunteers: bool  # True means accept healthy
-    text: str
-    primary_outcome: str
-    secondary_outcome: str
+    accepts_healthy_volunteers: bool  # True means accept healthy
 
+    primary_outcomes: Optional[List[str]]
+    secondary_outcomes: Optional[List[str]]
+
+    conditions: Optional[List[str]]
+    interventions: Optional[List[str]]
+
+    text: str
     # text which was preprocessed and is already tokenized
     text_preprocessed: Optional[List[str]] = None

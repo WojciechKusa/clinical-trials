@@ -269,20 +269,20 @@ def parse_clinical_trials_from_folder(
             ClinicalTrial(
                 org_study_id=org_study_id,
                 nct_id=nct_id,
-                summary=brief_summary,
-                description=description,
+                brief_summary=brief_summary,
+                detailed_description=description,
                 criteria=criteria,
                 gender=gender,
                 minimum_age=minimum_age,
                 maximum_age=maximum_age,
-                healthy_volunteers=healthy_volunteers,
+                accepts_healthy_volunteers=healthy_volunteers,
                 inclusion=inclusion,
                 exclusion=exclusion,
                 brief_title=brief_title,
                 official_title=official_title,
                 text=text,
-                primary_outcome=primary_outcomes,
-                secondary_outcome=secondary_outcomes,
+                primary_outcomes=primary_outcomes,
+                secondary_outcomes=secondary_outcomes,
             )
         )
 
