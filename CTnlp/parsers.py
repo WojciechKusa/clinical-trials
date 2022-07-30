@@ -191,7 +191,7 @@ def parse_eligibility(
     )
 
 
-def get_outcomes(root: ET) -> str:
+def get_outcomes(root: ET) -> Tuple[List[str], List[str]]:
     primary_outcomes = []
     secondary_outcomes = []
     if primarys := root.findall("primary_outcome"):
@@ -201,7 +201,7 @@ def get_outcomes(root: ET) -> str:
         )
 
     if secondarys := root.findall("secondary_outcome"):
-        primary_outcomes.extend(
+        secondary_outcomes.extend(
             getattr(secondary.find("measure"), "text", None)
             for secondary in secondarys
         )
