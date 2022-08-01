@@ -200,23 +200,18 @@ def get_outcomes(root: ET) -> Tuple[List[str], List[str]]:
 
 
 def get_conditions(root: ET) -> List[str]:
-    conditions: List[str] = []
-    for condition in root.findall("condition"):
-        conditions.append(condition.text)
-    return conditions
+    return [condition.text for condition in root.findall("condition")]
 
 
 def get_interventions(root: ET) -> List[Intervention]:
-    interventions: List[Intervention] = []
-    for _intervention in root.findall("intervention"):
-        interventions.append(
-            Intervention(
-                type=safe_get_item("intervention_type", _intervention),
-                name=safe_get_item("intervention_name", _intervention),
-                description=safe_get_item("description", _intervention),
-            )
+    return [
+        Intervention(
+            type=safe_get_item("intervention_type", _intervention),
+            name=safe_get_item("intervention_name", _intervention),
+            description=safe_get_item("description", _intervention),
         )
-    return interventions
+        for _intervention in root.findall("intervention")
+    ]
 
 
 def parse_clinical_trial(root: ET) -> ClinicalTrial:
