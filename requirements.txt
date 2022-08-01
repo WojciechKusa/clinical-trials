@@ -1,2 +1,2 @@
-setuptools~=61.2.0
-tqdm
+tqdm~=4.64.0
+defusedxml~=0.7.1
