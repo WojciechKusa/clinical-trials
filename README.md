@@ -8,6 +8,6 @@ Set of parsers and classes for clinical trials data from [ClinicalTrials.gov](ht
 pip install -e .  
 ```
 
-## Usage 
+## Usage
 
 This package is mainly intended for working with clinical trials data dump in xml files.
