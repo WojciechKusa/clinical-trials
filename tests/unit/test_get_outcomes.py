@@ -9,7 +9,7 @@ outcomes_xml = """<?xml version="1.0" encoding="UTF-8"?>
   <primary_outcome>
     <measure>Effectiveness of L-glutamine for mucositis</measure>
     <time_frame>2 weeks after end of radiation treatment</time_frame>
-    <description>Evaluate effectiveness of L-glutamine as compared to placebo in terms of: maximum toxicity grade during radiation treatment, mucositis toxicity grade 2 weeks after the end of radiation treatment, and patient reported worst mouth pain two weeks after the end of radiation treatment.</description>
+    <description>Evaluate effectiveness of L-glutamine as compared to placebo.</description>
   </primary_outcome>
   <secondary_outcome>
     <measure>Duration of severe mucositis, radiation treatment delay, and weight loss</measure>
