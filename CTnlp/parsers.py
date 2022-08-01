@@ -2,18 +2,21 @@
 import logging
 import os
 import re
-import xml.etree.ElementTree as ET
 from glob import glob
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Dict
 
+import defusedxml.ElementTree as ET
 import tqdm
 
-from CTnlp.clinical_trial import ClinicalTrial
+from CTnlp.clinical_trial import ClinicalTrial, Intervention
 from CTnlp.utils import Gender
 
 
 def safe_get_item(item_name: str, root: ET) -> str:
-    return item.text if (item := root.find(item_name)) else ""
+    try:
+        return root.find(item_name).text
+    except AttributeError:
+        return ""
 
 
 def get_criteria(criteria_string: str) -> List[str]:
@@ -91,35 +94,24 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
     return inclusions, exclusions
 
 
-def parse_age(age_string: str) -> Union[int, float, None]:
+def parse_age(age_string: str) -> Optional[float]:
     if not age_string:
         return None
     if age_string in {"N/A", "None"}:
         return None
 
-    match = re.search(r"(\d{1,2}) Year[s]?", age_string)
-    if match is not None:
-        return int(match[1])
-
-    match = re.search(r"(\d{1,2}) Month[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 12
-
-    match = re.search(r"(\d{1,2}) Week[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 52
-
-    match = re.search(r"(\d{1,2}) Day[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 365
-
-    match = re.search(r"(\d{1,2}) Hour[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 8766
-
-    match = re.search(r"(\d{1,2}) Minute[s]?", age_string)
-    if match is not None:
-        return int(match[1]) / 525960
+    age_patterns: Dict[str, int] = {
+        r"(\d{1,3}) Year[s]?": 1,
+        r"(\d{1,3}) Month[s]?": 12,
+        r"(\d{1,3}) Week[s]?": 52,
+        r"(\d{1,3}) Day[s]?": 365,
+        r"(\d{1,3}) Hour[s]?": 8766,
+        r"(\d{1,3}) Minute[s]?": 525960,
+    }
+    for pattern, denominator in age_patterns.items():
+        match = re.search(re.compile(pattern, flags=re.IGNORECASE), age_string)
+        if match is not None:
+            return int(match[1]) / denominator
 
     logging.warning("couldn't parse age from %s", age_string)
     return None
@@ -136,7 +128,7 @@ def parse_gender(gender_string: Optional[str]) -> Gender:
         return Gender.unknown  # most probably gender criteria were empty
 
 
-def parse_health_status(healthy_volunteers: Optional[str]) -> bool: # sourcery skip
+def parse_health_status(healthy_volunteers: Optional[str]) -> bool:  # sourcery skip
     if healthy_volunteers == "Accepts Healthy Volunteers":
         return True
     elif healthy_volunteers == "No":
@@ -163,8 +155,8 @@ def parse_eligibility(
             criteria = ""
 
         gender = getattr(eligibility.find("gender"), "text", None)
-        minimum_age = getattr(eligibility.find("minimum_age"), "text", None)
-        maximum_age = getattr(eligibility.find("maximum_age"), "text", None)
+        minimum_age = getattr(eligibility.find("minimum_age"), "text", "")
+        maximum_age = getattr(eligibility.find("maximum_age"), "text", "")
         healthy_volunteers = getattr(
             eligibility.find("healthy_volunteers"), "text", None
         )
@@ -191,22 +183,100 @@ def parse_eligibility(
     )
 
 
-def get_outcomes(root: ET) -> str:
-    primary_outcomes = []
-    secondary_outcomes = []
+def get_outcomes(root: ET) -> Tuple[List[str], List[str]]:
+    primary_outcomes: List[str] = []
+    secondary_outcomes: List[str] = []
     if primarys := root.findall("primary_outcome"):
         primary_outcomes.extend(
-            getattr(primary.find("measure"), "text", None)
-            for primary in primarys
+            getattr(primary.find("measure"), "text", "") for primary in primarys
         )
 
     if secondarys := root.findall("secondary_outcome"):
-        primary_outcomes.extend(
-            getattr(secondary.find("measure"), "text", None)
-            for secondary in secondarys
+        secondary_outcomes.extend(
+            getattr(secondary.find("measure"), "text", "") for secondary in secondarys
         )
 
     return primary_outcomes, secondary_outcomes
+
+
+def get_conditions(root: ET) -> List[str]:
+    return [condition.text for condition in root.findall("condition")]
+
+
+def get_interventions(root: ET) -> List[Intervention]:
+    return [
+        Intervention(
+            type=safe_get_item("intervention_type", _intervention),
+            name=safe_get_item("intervention_name", _intervention),
+            description=safe_get_item("description", _intervention),
+        )
+        for _intervention in root.findall("intervention")
+    ]
+
+
+def parse_clinical_trial(root: ET) -> ClinicalTrial:
+    org_study_id = getattr(
+        root.find("id_info").find("org_study_id"), "text", "empty_org_study_id"
+    )
+    nct_id = getattr(root.find("id_info").find("nct_id"), "text", "empty_nct_id")
+
+    brief_summary = root.find("brief_summary")
+    if brief_summary:
+        brief_summary = brief_summary[0].text
+
+    if not brief_summary:
+        brief_summary = ""
+
+    description = root.find("detailed_description")
+    if description:
+        description = description[0].text
+
+    if not description:
+        description = ""
+    brief_title = safe_get_item(item_name="brief_title", root=root)
+    official_title = safe_get_item(item_name="official_title", root=root)
+    study_type = safe_get_item(item_name="study_type", root=root)
+
+    conditions = get_conditions(root=root)
+    interventions = get_interventions(root=root)
+
+    primary_outcomes, secondary_outcomes = get_outcomes(root=root)
+
+    (
+        gender,
+        minimum_age,
+        maximum_age,
+        healthy_volunteers,
+        criteria,
+        inclusion,
+        exclusion,
+    ) = parse_eligibility(root=root)
+
+    text: str = brief_title + official_title + brief_summary + criteria
+    if not text.strip():
+        text = "empty"
+
+    return ClinicalTrial(
+        org_study_id=org_study_id,
+        nct_id=nct_id,
+        brief_summary=brief_summary,
+        detailed_description=description,
+        criteria=criteria,
+        gender=gender,
+        minimum_age=minimum_age,
+        maximum_age=maximum_age,
+        accepts_healthy_volunteers=healthy_volunteers,
+        inclusion=inclusion,
+        exclusion=exclusion,
+        brief_title=brief_title,
+        official_title=official_title,
+        text=text,
+        primary_outcomes=primary_outcomes,
+        secondary_outcomes=secondary_outcomes,
+        study_type=study_type,
+        conditions=conditions,
+        interventions=interventions,
+    )
 
 
 def parse_clinical_trials_from_folder(
@@ -228,63 +298,8 @@ def parse_clinical_trials_from_folder(
     for file in tqdm.tqdm(files):
         tree = ET.parse(file)
         root = tree.getroot()
-
-        org_study_id = getattr(root.find("id_info").find("org_study_id"), "text", None)
-        nct_id = getattr(root.find("id_info").find("nct_id"), "text", None)
-
-        brief_summary = root.find("brief_summary")
-        if brief_summary:
-            brief_summary = brief_summary[0].text
-
-        if not brief_summary:
-            brief_summary = ""
-
-        description = root.find("detailed_description")
-        if description:
-            description = description[0].text
-
-        if not description:
-            description = ""
-
-        brief_title = safe_get_item(item_name="brief_title", root=root)
-        official_title = safe_get_item(item_name="official_title", root=root)
-
-        primary_outcomes, secondary_outcomes = get_outcomes(root=root)
-
-        (
-            gender,
-            minimum_age,
-            maximum_age,
-            healthy_volunteers,
-            criteria,
-            inclusion,
-            exclusion,
-        ) = parse_eligibility(root=root)
-
-        text: str = brief_title + official_title + brief_summary + criteria
-        if not text.strip():
-            text = "empty"
-
-        clinical_trials.append(
-            ClinicalTrial(
-                org_study_id=org_study_id,
-                nct_id=nct_id,
-                summary=brief_summary,
-                description=description,
-                criteria=criteria,
-                gender=gender,
-                minimum_age=minimum_age,
-                maximum_age=maximum_age,
-                healthy_volunteers=healthy_volunteers,
-                inclusion=inclusion,
-                exclusion=exclusion,
-                brief_title=brief_title,
-                official_title=official_title,
-                text=text,
-                primary_outcome=primary_outcomes,
-                secondary_outcome=secondary_outcomes,
-            )
-        )
+        clinical_trial = parse_clinical_trial(root=root)
+        clinical_trials.append(clinical_trial)
 
     if len(files) > 0:
         total_parsed = 0

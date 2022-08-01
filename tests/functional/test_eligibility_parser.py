@@ -1,5 +1,6 @@
 import unittest
-import xml.etree.ElementTree as ET
+
+import defusedxml.ElementTree as ET
 
 from CTnlp.parsers import parse_eligibility
 from CTnlp.utils import Gender
