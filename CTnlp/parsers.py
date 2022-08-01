@@ -8,12 +8,15 @@ from typing import List, Optional, Tuple, Dict
 import defusedxml.ElementTree as ET
 import tqdm
 
-from CTnlp.clinical_trial import ClinicalTrial
+from CTnlp.clinical_trial import ClinicalTrial, Intervention
 from CTnlp.utils import Gender
 
 
 def safe_get_item(item_name: str, root: ET) -> str:
-    return item.text if (item := root.find(item_name)) else ""
+    try:
+        return root.find(item_name).text
+    except AttributeError:
+        return ""
 
 
 def get_criteria(criteria_string: str) -> List[str]:
@@ -152,8 +155,8 @@ def parse_eligibility(
             criteria = ""
 
         gender = getattr(eligibility.find("gender"), "text", None)
-        minimum_age = getattr(eligibility.find("minimum_age"), "text", None)
-        maximum_age = getattr(eligibility.find("maximum_age"), "text", None)
+        minimum_age = getattr(eligibility.find("minimum_age"), "text", "")
+        maximum_age = getattr(eligibility.find("maximum_age"), "text", "")
         healthy_volunteers = getattr(
             eligibility.find("healthy_volunteers"), "text", None
         )
@@ -181,24 +184,46 @@ def parse_eligibility(
 
 
 def get_outcomes(root: ET) -> Tuple[List[str], List[str]]:
-    primary_outcomes = []
-    secondary_outcomes = []
+    primary_outcomes: List[str] = []
+    secondary_outcomes: List[str] = []
     if primarys := root.findall("primary_outcome"):
         primary_outcomes.extend(
-            getattr(primary.find("measure"), "text", None) for primary in primarys
+            getattr(primary.find("measure"), "text", "") for primary in primarys
         )
 
     if secondarys := root.findall("secondary_outcome"):
         secondary_outcomes.extend(
-            getattr(secondary.find("measure"), "text", None) for secondary in secondarys
+            getattr(secondary.find("measure"), "text", "") for secondary in secondarys
         )
 
     return primary_outcomes, secondary_outcomes
 
 
+def get_conditions(root: ET) -> List[str]:
+    conditions: List[str] = []
+    for condition in root.findall("condition"):
+        conditions.append(condition.text)
+    return conditions
+
+
+def get_interventions(root: ET) -> List[Intervention]:
+    interventions: List[Intervention] = []
+    for _intervention in root.findall("intervention"):
+        interventions.append(
+            Intervention(
+                type=safe_get_item("intervention_type", _intervention),
+                name=safe_get_item("intervention_name", _intervention),
+                description=safe_get_item("description", _intervention),
+            )
+        )
+    return interventions
+
+
 def parse_clinical_trial(root: ET) -> ClinicalTrial:
-    org_study_id = getattr(root.find("id_info").find("org_study_id"), "text", None)
-    nct_id = getattr(root.find("id_info").find("nct_id"), "text", None)
+    org_study_id = getattr(
+        root.find("id_info").find("org_study_id"), "text", "empty_org_study_id"
+    )
+    nct_id = getattr(root.find("id_info").find("nct_id"), "text", "empty_nct_id")
 
     brief_summary = root.find("brief_summary")
     if brief_summary:
@@ -213,9 +238,12 @@ def parse_clinical_trial(root: ET) -> ClinicalTrial:
 
     if not description:
         description = ""
-
     brief_title = safe_get_item(item_name="brief_title", root=root)
     official_title = safe_get_item(item_name="official_title", root=root)
+    study_type = safe_get_item(item_name="study_type", root=root)
+
+    conditions = get_conditions(root=root)
+    interventions = get_interventions(root=root)
 
     primary_outcomes, secondary_outcomes = get_outcomes(root=root)
 
@@ -250,6 +278,9 @@ def parse_clinical_trial(root: ET) -> ClinicalTrial:
         text=text,
         primary_outcomes=primary_outcomes,
         secondary_outcomes=secondary_outcomes,
+        study_type=study_type,
+        conditions=conditions,
+        interventions=interventions,
     )
 
 

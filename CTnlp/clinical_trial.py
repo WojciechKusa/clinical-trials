@@ -5,6 +5,14 @@ from CTnlp.utils import Gender
 
 
 @dataclass
+class Intervention:
+    """dataclass modelling clinical trials' intervention."""
+    type: str
+    name: str
+    description: Optional[str]
+
+
+@dataclass
 class ClinicalTrial:
     """ClinicalTrial is a wrapper class that contains most important fields
     from the ClicnialTrials xml dump file.
@@ -21,7 +29,7 @@ class ClinicalTrial:
     brief_summary: str
     detailed_description: str
 
-    study_type: str
+    study_type: Optional[str]
 
     criteria: str
     inclusion: List[str]
@@ -35,7 +43,7 @@ class ClinicalTrial:
     secondary_outcomes: Optional[List[str]]
 
     conditions: Optional[List[str]]
-    interventions: Optional[List[str]]
+    interventions: Optional[List[Intervention]]
 
     text: str
     # text which was preprocessed and is already tokenized
