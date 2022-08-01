@@ -2,10 +2,10 @@
 import logging
 import os
 import re
-import xml.etree.ElementTree as ET
 from glob import glob
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Dict
 
+import defusedxml.ElementTree as ET
 import tqdm
 
 from CTnlp.clinical_trial import ClinicalTrial
@@ -165,7 +165,6 @@ def parse_eligibility(
         maximum_age = ""
         healthy_volunteers = ""
     gender = parse_gender(gender)
-    print(minimum_age)
     minimum_age = parse_age(minimum_age)
     maximum_age = parse_age(maximum_age)
     healthy_volunteers = parse_health_status(healthy_volunteers)

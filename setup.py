@@ -9,6 +9,7 @@ setup(
     author_email="wojciech.kusa@tuwien.ac.at",
     install_requires=[
         "tqdm==4.64.0",
+        "defusedxml==0.7.1"
     ],
     license="GPL-3.0",
 )

@@ -1,5 +1,6 @@
 import unittest
-import xml.etree.ElementTree as ET
+
+import defusedxml.ElementTree as ET
 
 from CTnlp.parsers import get_outcomes
 
