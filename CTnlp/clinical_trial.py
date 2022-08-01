@@ -4,7 +4,7 @@ from typing import List, Optional
 from CTnlp.utils import Gender
 
 
-@dataclass
+@dataclass(frozen=True)
 class Intervention:
     """dataclass modelling clinical trials' intervention."""
     type: str
