@@ -7,6 +7,7 @@ from CTnlp.utils import Gender
 @dataclass(frozen=True)
 class Intervention:
     """dataclass modelling clinical trials' intervention."""
+
     type: str
     name: str
     description: Optional[str]
