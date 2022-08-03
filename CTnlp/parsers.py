@@ -228,10 +228,7 @@ def create_text_summary(
         + description.strip()
         + criteria.strip()
     )
-    if not text.strip():
-        return "empty"
-    else:
-        return text
+    return text if text.strip() else "empty"
 
 
 def parse_clinical_trial(root: ET) -> ClinicalTrial:
