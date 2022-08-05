@@ -317,7 +317,11 @@ def parse_clinical_trials_from_folder(
 
     clinical_trials = []
     for file in tqdm.tqdm(files):
-        tree = ET.parse(file)
+        try:
+            tree = ET.parse(file)
+        except ET.ParseError:
+            logging.error("Skipping file %s", file)
+            continue
         root = tree.getroot()
         clinical_trial = parse_clinical_trial(root=root)
         clinical_trials.append(clinical_trial)
