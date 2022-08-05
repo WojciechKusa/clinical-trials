@@ -13,7 +13,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 trec_topics = os.path.join(HERE, "../test_data/trec_topics_2022.xml")
 
 if not os.path.exists(trec_topics):
-    open(trec_topics, "wb").write(requests.get(URL, headers=headers).content)
+    with open(trec_topics, "wb") as f:
+        f.write(requests.get(URL, headers=headers).content)
 
 
 class TestPatientsLoader(unittest.TestCase):
