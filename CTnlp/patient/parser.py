@@ -20,21 +20,24 @@ def load_patients_from_xml(
     root = tree.getroot()
 
     patients = []
-    if input_type == "TREC":
-        for elem in root:
-            patients.append(
-                Patient(
-                    patient_id=int(elem.attrib["number"]), description=elem.text.strip()
-                )
+    if input_type == "CSIRO":
+        patients.extend(
+            Patient(
+                patient_id=int(elem.attrib["number"]),
+                description=elem[0].text.strip(),
             )
-    elif input_type == "CSIRO":
-        for elem in root:
-            patients.append(
-                Patient(
-                    patient_id=int(elem.attrib["number"]),
-                    description=elem[0].text.strip(),
-                )
+            for elem in root
+        )
+
+    elif input_type == "TREC":
+        patients.extend(
+            Patient(
+                patient_id=int(elem.attrib["number"]),
+                description=elem.text.strip(),
             )
+            for elem in root
+        )
+
     else:
         raise ValueError("input_type can be only TREC or CSIRO")
 
