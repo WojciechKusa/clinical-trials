@@ -214,23 +214,6 @@ def get_interventions(root: ET) -> List[Intervention]:
     ]
 
 
-def create_text_summary(
-    brief_title: str,
-    official_title: str,
-    brief_summary: str,
-    description: str,
-    criteria: str,
-) -> str:
-    text: str = (
-        brief_title.strip()
-        + official_title.strip()
-        + brief_summary.strip()
-        + description.strip()
-        + criteria.strip()
-    )
-    return text if text.strip() else "empty"
-
-
 def parse_clinical_trial(root: ET) -> ClinicalTrial:
     org_study_id = getattr(
         root.find("id_info").find("org_study_id"), "text", "empty_org_study_id"
@@ -269,14 +252,6 @@ def parse_clinical_trial(root: ET) -> ClinicalTrial:
         exclusion,
     ) = parse_eligibility(root=root)
 
-    text = create_text_summary(
-        brief_title=brief_title,
-        official_title=official_title,
-        brief_summary=brief_summary,
-        description=description,
-        criteria=criteria,
-    )
-
     return ClinicalTrial(
         org_study_id=org_study_id,
         nct_id=nct_id,
@@ -296,7 +271,6 @@ def parse_clinical_trial(root: ET) -> ClinicalTrial:
         study_type=study_type,
         conditions=conditions,
         interventions=interventions,
-        text=text,
     )
 
 

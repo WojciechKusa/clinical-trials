@@ -46,6 +46,12 @@ class ClinicalTrial:
     conditions: Optional[List[str]]
     interventions: Optional[List[Intervention]]
 
-    text: str
     # text which was preprocessed and is already tokenized
     text_preprocessed: Optional[List[str]] = None
+
+    def text(self) -> str:
+        """returns concatenated text of major fields in clinical trial."""
+        _text = f"{self.brief_title.strip()} {self.official_title.strip()}\n"
+        _text += f"{self.brief_summary.strip()} {self.detailed_description.strip()}\n"
+        _text += f"{self.criteria.strip()}"
+        return _text
