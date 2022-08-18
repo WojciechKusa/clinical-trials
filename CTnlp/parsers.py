@@ -141,7 +141,7 @@ def parse_health_status(healthy_volunteers: Optional[str]) -> bool:  # sourcery 
 
 def parse_eligibility(
     root: ET,
-) -> Tuple[Gender, int, int, bool, str, List[str], List[str]]:
+) -> Tuple[Gender, Optional[float], Optional[float], bool, str, List[str], List[str]]:
     inclusion: List[str] = []
     exclusion: List[str] = []
     if eligibility := root.find("eligibility"):
