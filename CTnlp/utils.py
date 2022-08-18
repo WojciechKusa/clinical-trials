@@ -2,7 +2,7 @@
 from enum import Enum
 
 
-class Gender(Enum):
+class Gender(str, Enum):
     """Enum type class for representing Gender in topics and clinical trials."""
 
     unknown = "U"
