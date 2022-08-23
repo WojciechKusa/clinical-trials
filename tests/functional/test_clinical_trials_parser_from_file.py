@@ -76,6 +76,16 @@ class TestCriteriaParserFromFile(unittest.TestCase):
     def test_interventions_size(self):
         self.assertEqual(1, len(self.clinical_trial.interventions))
 
+    def test_text_content(self):
+        """tests content of a test variable which contain multiple fields"""
+        expected_text = (
+            f"{self.clinical_trial.brief_title.strip()} {self.clinical_trial.official_title.strip()}\n"
+            f"{self.clinical_trial.brief_summary.strip()} "
+            f"{self.clinical_trial.detailed_description.strip()}\n"
+            f"{self.clinical_trial.criteria.strip()}"
+        )
+        self.assertEqual(expected_text, self.clinical_trial.text)
+
 
 if __name__ == "__main__":
     unittest.main()

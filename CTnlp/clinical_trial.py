@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 from CTnlp.utils import Gender
@@ -48,10 +48,11 @@ class ClinicalTrial:
 
     # text which was preprocessed and is already tokenized
     text_preprocessed: Optional[List[str]] = None
+    text: str = field(init=False)
 
-    def text(self) -> str:
-        """returns concatenated text of major fields in clinical trial."""
-        _text = f"{self.brief_title.strip()} {self.official_title.strip()}\n"
-        _text += f"{self.brief_summary.strip()} {self.detailed_description.strip()}\n"
-        _text += f"{self.criteria.strip()}"
-        return _text
+    def __post_init__(self):
+        self.text = (
+            f"{self.brief_title.strip()} {self.official_title.strip()}\n"
+            + f"{self.brief_summary.strip()} {self.detailed_description.strip()}\n"
+            + f"{self.criteria.strip()}"
+        )
