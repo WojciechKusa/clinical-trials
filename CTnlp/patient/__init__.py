@@ -3,6 +3,7 @@ from typing import Union, List, Optional
 
 import defusedxml.ElementTree as ET
 
+from CTnlp.patient.parsers import extract_sections
 from CTnlp.utils import Gender
 
 
@@ -10,6 +11,7 @@ from CTnlp.utils import Gender
 class Patient:
     """dataclass containing patient data."""
 
+    unique_id: str
     patient_id: int
     description: str
 
@@ -37,12 +39,14 @@ def load_patients_from_xml(
     :return: List of Patient objects
     """
     tree = ET.parse(patient_file)
+    filename = patient_file.split("/")[-1]
     root = tree.getroot()
 
     patients = []
     if input_type == "CSIRO":
         patients.extend(
             Patient(
+                unique_id=f"{filename}_{elem.attrib['number']}",
                 patient_id=int(elem.attrib["number"]),
                 description=elem[0].text.strip(),
             )
@@ -52,13 +56,21 @@ def load_patients_from_xml(
     elif input_type == "TREC":
         patients.extend(
             Patient(
+                unique_id=f"{filename}_{elem.attrib['number']}",
                 patient_id=int(elem.attrib["number"]),
                 description=elem.text.strip(),
             )
             for elem in root
         )
-
     else:
         raise ValueError("input_type can be only 'TREC' or 'CSIRO'")
+
+    for patient in patients:
+        current_mh_text, past_mh_text, family_mh_text = extract_sections(
+            patient.description
+        )
+        patient.current_medical_history = current_mh_text
+        patient.past_medical_history = past_mh_text
+        patient.family_medical_history = family_mh_text
 
     return patients
