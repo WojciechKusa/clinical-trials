@@ -8,7 +8,7 @@ from CTnlp.utils import Gender
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-input_data = os.path.join(HERE, "../test_data/NCT00000102.xml")
+input_data = os.path.join(HERE, "../test_data/trials/NCT00000102.xml")
 
 
 class TestCriteriaParserFromFile(unittest.TestCase):

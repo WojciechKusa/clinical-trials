@@ -6,7 +6,7 @@ from CTnlp.parsers import parse_clinical_trials_from_folder
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-input_data = os.path.join(HERE, "../test_data")
+input_data = os.path.join(HERE, "../test_data/trials")
 
 
 class TestCriteriaParserFromFolder(unittest.TestCase):
