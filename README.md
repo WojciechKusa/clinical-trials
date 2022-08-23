@@ -22,7 +22,7 @@ cts = parse_clinical_trials_from_folder(folder_name=TRIALS_FOLDER)
 `cts` will be a list of `ClinicalTrials` objects.
 
 
-In order to convert clinical trials to dictionary you can use `todict` method from `dataclasses`:
+In order to convert clinical trials to dictionary you can use `asdict` method from `dataclasses`:
 
 ```python
 from dataclasses import asdict
