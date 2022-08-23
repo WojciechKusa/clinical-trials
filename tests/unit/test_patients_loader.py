@@ -24,9 +24,7 @@ class TestPatientsLoader(unittest.TestCase):
         self.assertEqual(50, len(self.patients))
 
     def test_description_first_patient_first_tokens(self):
-        self.assertEqual(
-            "A 19-year-old", self.patients[0].description[:13]
-        )
+        self.assertEqual("A 19-year-old", self.patients[0].description[:13])
 
 
 if __name__ == "__main__":
