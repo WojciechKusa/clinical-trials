@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests
-from CTnlp.patient.parser import load_patients_from_xml
+from CTnlp.patient import load_patients_from_xml
 
 headers = {
     "User-Agent": "Mozilla/5.0 Firefox/55.0",
