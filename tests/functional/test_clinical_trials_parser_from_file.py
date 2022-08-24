@@ -6,9 +6,9 @@ import defusedxml.ElementTree
 from CTnlp.parsers import parse_clinical_trial
 from CTnlp.utils import Gender
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
-input_data = os.path.join(HERE, "../test_data/trials/NCT00000102.xml")
+input_data = os.path.join(current_file_directory, "../test_data/trials/NCT00000102.xml")
 
 
 class TestCriteriaParserFromFile(unittest.TestCase):

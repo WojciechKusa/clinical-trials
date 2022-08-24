@@ -4,9 +4,9 @@ import unittest
 from CTnlp.clinical_trial import ClinicalTrial
 from CTnlp.parsers import parse_clinical_trials_from_folder
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
-input_data = os.path.join(HERE, "../test_data/trials")
+input_data = os.path.join(current_file_directory, "../test_data/trials")
 
 
 class TestCriteriaParserFromFolder(unittest.TestCase):
