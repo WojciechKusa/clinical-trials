@@ -2,6 +2,8 @@
 
 Set of parsers and classes for clinical trials data from [ClinicalTrials.gov](https://clinicaltrials.gov)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c308c429fbf447d68a2bc64c109d78e7)](https://www.codacy.com/gh/WojciechKusa/clinical-trials/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WojciechKusa/clinical-trials&amp;utm_campaign=Badge_Grade)
+
 ## Installation
 
 ```bash
@@ -21,8 +23,7 @@ cts = parse_clinical_trials_from_folder(folder_name=TRIALS_FOLDER)
 
 `cts` will be a list of `ClinicalTrials` objects.
 
-
-In order to convert clinical trials to dictionary you can use `todict` method from `dataclasses`:
+In order to convert clinical trials to dictionary you can use `asdict` method from `dataclasses`:
 
 ```python
 from dataclasses import asdict
@@ -32,6 +33,7 @@ from dataclasses import asdict
 
 ## Data
 
-To download data for your analysis, follow the description from [here](https://clinicaltrials.gov/ct2/resources/download#DownloadAllData).
+To download data for your analysis, follow the description
+from [here](https://clinicaltrials.gov/ct2/resources/download#DownloadAllData).
 
 Description of the ClinicalTrials schema: <https://prsinfo.clinicaltrials.gov/ProtocolRecordSchema.xsd>

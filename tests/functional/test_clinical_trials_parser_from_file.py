@@ -1,20 +1,20 @@
 import os
 import unittest
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree
 
 from CTnlp.parsers import parse_clinical_trial
 from CTnlp.utils import Gender
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
-input_data = os.path.join(HERE, "../test_data/NCT00000102.xml")
+input_data = os.path.join(current_file_directory, "../test_data/trials/NCT00000102.xml")
 
 
 class TestCriteriaParserFromFile(unittest.TestCase):
     """Test eligibility criteria parser."""
 
-    root = ET.parse(input_data).getroot()
+    root = defusedxml.ElementTree.parse(input_data).getroot()
     clinical_trial = parse_clinical_trial(root=root)
 
     def test_org_study_id(self):
@@ -75,6 +75,16 @@ class TestCriteriaParserFromFile(unittest.TestCase):
 
     def test_interventions_size(self):
         self.assertEqual(1, len(self.clinical_trial.interventions))
+
+    def test_text_content(self):
+        """tests content of a test variable which contain multiple fields"""
+        expected_text = (
+            f"{self.clinical_trial.brief_title.strip()} {self.clinical_trial.official_title.strip()}\n"
+            f"{self.clinical_trial.brief_summary.strip()} "
+            f"{self.clinical_trial.detailed_description.strip()}\n"
+            f"{self.clinical_trial.criteria.strip()}"
+        )
+        self.assertEqual(expected_text, self.clinical_trial.text)
 
 
 if __name__ == "__main__":
