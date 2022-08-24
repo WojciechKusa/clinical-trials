@@ -10,9 +10,9 @@ headers = {
 }
 
 URL = "http://www.trec-cds.org/topics2022.xml"
-HERE = os.path.dirname(os.path.abspath(__file__))
+current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
-trec_topics = os.path.join(HERE, "../test_data/trec_topics_2022.xml")
+trec_topics = os.path.join(current_file_directory, "../test_data/trec_topics_2022.xml")
 
 if not os.path.exists(trec_topics):
     with open(trec_topics, "wb") as f:
