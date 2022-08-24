@@ -1,5 +1,7 @@
 # clinical-trials
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f4ddceaeff734410a9ad5bb3b0bed2a4)](https://app.codacy.com/gh/WojciechKusa/clinical-trials?utm_source=github.com&utm_medium=referral&utm_content=WojciechKusa/clinical-trials&utm_campaign=Badge_Grade_Settings)
+
 Set of parsers and classes for clinical trials data from [ClinicalTrials.gov](https://clinicaltrials.gov)
 
 ## Installation
