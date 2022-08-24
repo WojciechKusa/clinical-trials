@@ -1,6 +1,8 @@
-import unittest
 import os
+import unittest
+
 import requests
+
 from CTnlp.patient import load_patients_from_xml
 
 headers = {

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Union, List, Optional
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree
 
 from CTnlp.patient.parsers import extract_sections
 from CTnlp.utils import Gender
@@ -38,7 +38,7 @@ def load_patients_from_xml(
     Currently only two types of xml files are supported: TREC-style and CSIRO-style.
     :return: List of Patient objects
     """
-    tree = ET.parse(patient_file)
+    tree = defusedxml.ElementTree.parse(patient_file)
     filename = patient_file.split("/")[-1]
     root = tree.getroot()
 

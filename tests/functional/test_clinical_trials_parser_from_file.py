@@ -1,7 +1,7 @@
 import os
 import unittest
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree
 
 from CTnlp.parsers import parse_clinical_trial
 from CTnlp.utils import Gender
@@ -14,7 +14,7 @@ input_data = os.path.join(HERE, "../test_data/trials/NCT00000102.xml")
 class TestCriteriaParserFromFile(unittest.TestCase):
     """Test eligibility criteria parser."""
 
-    root = ET.parse(input_data).getroot()
+    root = defusedxml.ElementTree.parse(input_data).getroot()
     clinical_trial = parse_clinical_trial(root=root)
 
     def test_org_study_id(self):
