@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from CTnlp.utils import Gender
 
@@ -56,3 +56,8 @@ class ClinicalTrial:
             + f"{self.brief_summary.strip()} {self.detailed_description.strip()}\n"
             + f"{self.criteria.strip()}"
         )
+
+    def fom_dict(self, d: Dict[str, Any]):
+        if d is not None:
+            for key, value in d.items():
+                setattr(self, key, value)
