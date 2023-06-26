@@ -2,13 +2,16 @@
 
 Set of parsers and classes for clinical trials data from [ClinicalTrials.gov](https://clinicaltrials.gov)
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c308c429fbf447d68a2bc64c109d78e7)](https://www.codacy.com/gh/WojciechKusa/clinical-trials/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WojciechKusa/clinical-trials&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c308c429fbf447d68a2bc64c109d78e7)](https://www.codacy.com/gh/WojciechKusa/clinical-trials/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WojciechKusa/clinical-trials&amp;utm_campaign=Badge_Grade) 
+![Unit tests](https://github.com/WojciechKusa/clinical-trials/actions/workflows/ci.yml/badge.svg?branch=main)
 
 ## Installation
 
 ```bash
 pip install -e .  
 ```
+
+Tested on Python 3.8+.
 
 ## Usage
 
