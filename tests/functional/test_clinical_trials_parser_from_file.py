@@ -79,7 +79,8 @@ class TestCriteriaParserFromFile(unittest.TestCase):
     def test_text_content(self):
         """tests content of a test variable which contain multiple fields"""
         expected_text = (
-            f"{self.clinical_trial.brief_title.strip()} {self.clinical_trial.official_title.strip()}\n"
+            f"{self.clinical_trial.brief_title.strip()} "
+            f"{self.clinical_trial.official_title.strip()}\n"
             f"{self.clinical_trial.brief_summary.strip()} "
             f"{self.clinical_trial.detailed_description.strip()}\n"
             f"{self.clinical_trial.criteria.strip()}"
