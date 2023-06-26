@@ -12,14 +12,32 @@ from CTnlp.clinical_trial import ClinicalTrial, Intervention
 from CTnlp.utils import Gender
 
 
-def safe_get_item(item_name: str, root: ET) -> str:
+def _safe_get_item(root: ET, tag_name: str, default: str = "") -> str:
+    """Returns text from the first element with tag_name in root."""
     try:
-        return root.find(item_name).text
+        return root.find(tag_name).text
     except AttributeError:
-        return ""
+        return default
+
+
+def _safe_get_nested_item(root: ET, tag_name: str, default: str = "") -> str:
+    """Returns text from the first element with tag_name in root."""
+    result = root.find(tag_name)
+    if result:
+        result = result[0].text
+
+    if not result:
+        result = default
+
+    return result
 
 
 def get_criteria(criteria_string: str) -> List[str]:
+    """Parses inclusion or exclusion criteria string and returns a list of criteria.
+
+    :param criteria_string:
+    :return:
+    """
     criteria_list: List[str] = []
 
     if criteria_string.strip():
@@ -38,8 +56,9 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
     - incl/excl criteria start with a header and are sorted inclusion first,
     - every criterion starts from a newline with a number or a '-' character.
 
-    :param criteria:
-    :return: if couldn't find any criteria returns None
+    :param criteria: element with criteria string
+    :return: tuple with inclusion and exclusion criteria lists. If criteria
+             cannot be parsed, returns None.
     """
     inclusion_criteria_strings = [
         "Inclusion Criteria",
@@ -95,6 +114,11 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
 
 
 def parse_age(age_string: str) -> Optional[float]:
+    """Parses age from string to a float number of years.
+
+    :param age_string: string with age from clinical trial
+    :return: Returns age or None if age cannot be parsed or does not exist.
+    """
     if not age_string:
         return None
     if age_string in {"N/A", "None"}:
@@ -118,6 +142,11 @@ def parse_age(age_string: str) -> Optional[float]:
 
 
 def parse_gender(gender_string: Optional[str]) -> Gender:
+    """Parse
+
+    :param gender_string:
+    :return:
+    """
     if gender_string == "All":
         return Gender.all
     elif gender_string == "Male":
@@ -206,9 +235,9 @@ def get_conditions(root: ET) -> List[str]:
 def get_interventions(root: ET) -> List[Intervention]:
     return [
         Intervention(
-            type=safe_get_item("intervention_type", _intervention),
-            name=safe_get_item("intervention_name", _intervention),
-            description=safe_get_item("description", _intervention),
+            type=_safe_get_item(root=_intervention, tag_name="intervention_type"),
+            name=_safe_get_item(root=_intervention, tag_name="intervention_name"),
+            description=_safe_get_item(root=_intervention, tag_name="description"),
         )
         for _intervention in root.findall("intervention")
     ]
@@ -220,22 +249,11 @@ def parse_clinical_trial(root: ET) -> ClinicalTrial:
     )
     nct_id = getattr(root.find("id_info").find("nct_id"), "text", "empty_nct_id")
 
-    brief_summary = root.find("brief_summary")
-    if brief_summary:
-        brief_summary = brief_summary[0].text
-
-    if not brief_summary:
-        brief_summary = ""
-
-    description = root.find("detailed_description")
-    if description:
-        description = description[0].text
-
-    if not description:
-        description = ""
-    brief_title = safe_get_item(item_name="brief_title", root=root)
-    official_title = safe_get_item(item_name="official_title", root=root)
-    study_type = safe_get_item(item_name="study_type", root=root)
+    brief_summary = _safe_get_nested_item(root=root, tag_name="brief_summary")
+    description = _safe_get_nested_item(root=root, tag_name="detailed_description")
+    brief_title = _safe_get_item(root=root, tag_name="brief_title")
+    official_title = _safe_get_item(root=root, tag_name="official_title")
+    study_type = _safe_get_item(root=root, tag_name="study_type")
 
     conditions = get_conditions(root=root)
     interventions = get_interventions(root=root)
