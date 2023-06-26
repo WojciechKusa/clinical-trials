@@ -18,7 +18,8 @@ class ClinicalTrial:
     """ClinicalTrial is a wrapper class that contains most important fields
     from the ClinicalTrials xml dump file.
 
-    text is a variable containing elements from title, detailed_description and criteria.
+    text is a variable containing elements from title, detailed_description
+        and criteria.
     text_preprocessed contains tokenized and preprocessed text."""
 
     org_study_id: str
