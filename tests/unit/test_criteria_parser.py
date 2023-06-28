@@ -101,19 +101,19 @@ EXAMPLE_CRITERIA = """
 """
 
 parsed_exclusion = [
-"History of treatment with dacarbazine.",
-"Subjects who received chemotherapy within 6 weeks before initial temozolomide administration.",
-"Subjects who received interstitial radiotherapy or stereotactic radiosurgery.",
-"Subjects who completed radiotherapy within 12 weeks before initial temozolomide administration.",
-"Surgery at first relapse (including biopsy) within 1 week before initial temozolomide administration.",
-"Subjects not recovered from acute toxicity due to previous therapy.",
-"High-risk subjects with complication of diseases other than malignant tumor, or who require systemic administration of antibiotics for infection.",
-"Previous or concurrent malignancies at other sites.",
-"Pregnant or nursing women.",
-"Women of childbearing potential not using an effective method of contraception.",
-"Subjects previously treated with temozolomide.",
-"Participation in an ongoing clinical study, or in other clinical studies within 6 months before initial temozolomide administration.",
-"Subjects found inappropriate for the study by the investigator or subinvestigator."
+    "History of treatment with dacarbazine.",
+    "Subjects who received chemotherapy within 6 weeks before initial temozolomide administration.",
+    "Subjects who received interstitial radiotherapy or stereotactic radiosurgery.",
+    "Subjects who completed radiotherapy within 12 weeks before initial temozolomide administration.",
+    "Surgery at first relapse (including biopsy) within 1 week before initial temozolomide administration.",
+    "Subjects not recovered from acute toxicity due to previous therapy.",
+    "High-risk subjects with complication of diseases other than malignant tumor, or who require systemic administration of antibiotics for infection.",
+    "Previous or concurrent malignancies at other sites.",
+    "Pregnant or nursing women.",
+    "Women of childbearing potential not using an effective method of contraception.",
+    "Subjects previously treated with temozolomide.",
+    "Participation in an ongoing clinical study, or in other clinical studies within 6 months before initial temozolomide administration.",
+    "Subjects found inappropriate for the study by the investigator or subinvestigator.",
 ]
 
 
