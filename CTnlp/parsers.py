@@ -1,4 +1,5 @@
 """Module containing parsers for clinical trials file"""
+import copy
 import logging
 import os
 import re
@@ -50,8 +51,9 @@ def get_criteria(criteria_string: str) -> List[str]:
 
 
 def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
-    """Tries to parse the criteria xml element to find and extract inclusion and
+    """Parses the criteria xml element to find and extract inclusion and
     exclusion criteria for a study.
+
     It uses heuristics defined based on the dataset:
     - incl/excl criteria start with a header and are sorted inclusion first,
     - every criterion starts from a newline with a number or a '-' character.
@@ -60,57 +62,59 @@ def parse_criteria(criteria: str) -> Optional[Tuple[List[str], List[str]]]:
     :return: tuple with inclusion and exclusion criteria lists. If criteria
              cannot be parsed, returns None.
     """
-    inclusion_criteria_strings = [
-        "Inclusion Criteria",
-        "Inclusion criteria",
-        "Inclusive criteria",
-        "INCLUSION CRITERIA",
-    ]
-    for inclusion_criteria_string in inclusion_criteria_strings:
-        if inclusion_criteria_string in criteria:
-            criteria_after_split = criteria.split(inclusion_criteria_string)
-            break
-        else:
-            criteria_after_split = criteria
 
-    if len(criteria_after_split) == 2:
-        empty, tmp_inclusion = criteria_after_split
-    else:
-        return None
-    if empty.strip().lower() not in ["", "key", "-", "main"]:
-        logging.debug(
-            "parse_criteria: skipping not parsed text after split: %s", empty.strip()
+    def _split_criteria(text: str, header: str) -> Tuple[str, str]:
+        """Splits the criteria text based on the given header."""
+        regex_header = re.compile(re.escape(header), re.IGNORECASE)
+        match = regex_header.search(text)
+        if match:
+            start_index = match.start()
+            return text[:start_index], text[start_index + len(match.group()) :]
+        return text, ""
+
+    inclusion_headers = [
+        "inclusion criteria",
+        "inclusive criteria",
+    ]
+    exclusion_headers = [
+        "eclusion criteria",
+        "exclusion critieria",
+        "exclusion criteria",
+        "exclusive criteria",
+    ]
+    criteria_text = copy.copy(criteria)
+
+    # Splitting the text based on inclusion headers
+    inclusion_text = ""
+    pre_inclusion_text = ""
+    for inclusion_header in inclusion_headers:
+        pre_inclusion_text, inclusion_text = _split_criteria(
+            criteria_text, inclusion_header
         )
-
-    exclusion_criteria_strings = [
-        "Exclusion Criteria",
-        "Exclusion criteria",
-        "Exclusive criteria",
-        "EXCLUSION CRITERIA",
-        "ECLUSION CRITERIA",
-        "EXCLUSION CRITIERIA",
-    ]
-    for exclusion_criteria_string in exclusion_criteria_strings:
-        if tmp_inclusion.find(exclusion_criteria_string) != -1:
-            inclusion_exclusion_split = tmp_inclusion.split(exclusion_criteria_string)
+        if inclusion_text:
             break
-        else:
-            inclusion_exclusion_split = [tmp_inclusion]
 
-    exclusion = ""
-    if len(inclusion_exclusion_split) == 2:
-        inclusion, exclusion = inclusion_exclusion_split
-    elif len(inclusion_exclusion_split) == 1:
-        inclusion = inclusion_exclusion_split[0]
-    else:
+    if pre_inclusion_text.strip().lower() not in ["", "key", "-", "main"]:
+        logging.debug(
+            "parse_criteria: parser is skipping text found before inclusion split: %s",
+            pre_inclusion_text.strip(),
+        )
+    if not inclusion_text:
         return None
 
-    inclusions = get_criteria(criteria_string=inclusion)
-    if len(inclusions) == 0:
-        return None
-    exclusions = get_criteria(criteria_string=exclusion)
+    # Splitting the remaining text based on exclusion headers
+    exclusion_text = ""
+    for exclusion_header in exclusion_headers:
+        inclusion_text, exclusion_text = _split_criteria(
+            inclusion_text, exclusion_header
+        )
+        if exclusion_text:
+            break
 
-    return inclusions, exclusions
+    inclusion_criteria = get_criteria(inclusion_text)
+    exclusion_criteria = get_criteria(exclusion_text)
+
+    return inclusion_criteria, exclusion_criteria
 
 
 def parse_age(age_string: str) -> Optional[float]:
